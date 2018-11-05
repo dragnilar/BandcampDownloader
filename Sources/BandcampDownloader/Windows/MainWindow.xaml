@@ -77,6 +77,7 @@
                     <Label Padding="0" Margin="7,0,0,0">Reset settings</Label>
                 </StackPanel>
             </Button>
+            <Button HorizontalAlignment="Left" VerticalAlignment="Top" Width="100" Height="25" Margin="10,-25,0,0" Click="buttonTest_Click">Test</Button>
         </StackPanel>
     </Grid>
 </Window>

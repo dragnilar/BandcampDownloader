@@ -16,6 +16,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shell;
+using BandcampDownloader.ViewModels;
 using Config.Net;
 using ImageResizer;
 
@@ -940,6 +941,14 @@ namespace BandcampDownloader {
                     e.Cancel = true;
                 }
             }
+        }
+
+        private void buttonTest_Click(object sender, RoutedEventArgs e)
+        {
+            var viewModel = new MainViewModel();
+            var window = new MainWindowTest(viewModel);
+            window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            window.Show();
         }
 
         #endregion Events

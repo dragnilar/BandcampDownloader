@@ -85,6 +85,13 @@
     <Reference Include="Config.Net, Version=4.0.0.0, Culture=neutral, PublicKeyToken=d836a57afd299520, processorArchitecture=MSIL">
       <HintPath>..\packages\Config.Net.4.8.0\lib\net452\Config.Net.dll</HintPath>
     </Reference>
+    <Reference Include="DevExpress.Data.v18.1, Version=18.1.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.Mvvm.v18.1, Version=18.1.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.Xpf.Core.v18.1, Version=18.1.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.Xpf.LayoutControl.v18.1, Version=18.1.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.Xpf.Themes.VS2017Blue.v18.1, Version=18.1.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.Xpf.Themes.VS2017Dark.v18.1, Version=18.1.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.Xpf.Themes.VS2017Light.v18.1, Version=18.1.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="ImageResizer, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\ImageResizer.4.2.5\lib\net45\ImageResizer.dll</HintPath>
     </Reference>
@@ -100,9 +107,12 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Xml" />
     <Reference Include="taglib-sharp">
       <HintPath>..\packages\taglib.2.1.0.0\lib\taglib-sharp.dll</HintPath>
     </Reference>
+    <Reference Include="UIAutomationProvider" />
+    <Reference Include="UIAutomationTypes" />
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -117,6 +127,10 @@
     <Compile Include="Business Objects\TrackFile.cs" />
     <Compile Include="Business Objects\JSON\JsonAlbumData.cs" />
     <Compile Include="Business Objects\JSON\JsonTrack.cs" />
+    <Page Include="Windows\MainWindowMvvmTest.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Windows\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -130,11 +144,17 @@
     <Compile Include="Business Objects\Track.cs" />
     <Compile Include="Helpers\OnlyDigitsValidationRule.cs" />
     <Compile Include="Helpers\LogHelper.cs" />
+    <Compile Include="MediatorMessages\DownloaderLogMessage.cs" />
     <Compile Include="Miscellaneous\Constants.cs" />
     <Compile Include="Miscellaneous\LogType.cs" />
     <Compile Include="Miscellaneous\Extensions.cs" />
     <Compile Include="Helpers\FileHelper.cs" />
     <Compile Include="Miscellaneous\UserSettings.cs" />
+    <Compile Include="Properties\Annotations.cs" />
+    <Compile Include="ViewModels\MainViewModel.cs" />
+    <Compile Include="Windows\MainWindowMvvmTest.xaml.cs">
+      <DependentUpon>MainWindowMvvmTest.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>

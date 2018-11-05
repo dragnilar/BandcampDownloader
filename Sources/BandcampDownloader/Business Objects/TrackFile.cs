@@ -1,8 +1,7 @@
 ﻿using System;
 
 namespace BandcampDownloader {
-
-    internal class TrackFile {
+    public class TrackFile {
         public String  Url           { get; set; }
         public long    BytesReceived { get; set; }
         public long    Size          { get; set; }

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 
 namespace BandcampDownloader {
-    class Album {
+    public class Album {
         public String Artist { get; set; }
         public String ArtworkUrl { get; set; }
         public DateTime ReleaseDate { get; set; }
