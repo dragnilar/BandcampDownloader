@@ -1,3 +1,5 @@
+<h1><b>This Fork Does Not Currently Provide Anything Different!</b><br> The original can be found <a href="https://github.com/Otiel/BandcampDownloader/">here!</a></br></h1>
+
 ![Logo](http://i.imgur.com/S6AZHOg.png) Bandcamp Downloader
 ===========================================================
 
