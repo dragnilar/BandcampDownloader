@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 
-namespace BandcampDownloader {
-
-    internal static class Extensions {
+namespace BandcampDownloader
+{
+    internal static class Extensions
+    {
         /// <summary>
-        /// Replaces the forbidden chars \ / : * ? " &lt; &gt; | from the System.String
-        /// object by an underscore _ in order to be used for a Windows file or folder.
+        ///     Replaces the forbidden chars \ / : * ? " &lt; &gt; | from the System.String
+        ///     object by an underscore _ in order to be used for a Windows file or folder.
         /// </summary>
-        public static String ToAllowedFileName(this String fileName) {
-            if (fileName == null) {
-                throw new ArgumentNullException("fileName");
-            }
+        public static string ToAllowedFileName(this string fileName)
+        {
+            if (fileName == null) throw new ArgumentNullException("fileName");
 
             fileName = fileName.Replace("\\", "_");
             fileName = fileName.Replace("/", "_");

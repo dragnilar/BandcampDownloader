@@ -4,20 +4,25 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 
-namespace BandcampDownloader {
-
-    internal static class BandcampHelper {
+namespace BandcampDownloader
+{
+    internal static class BandcampHelper
+    {
         /// <summary>
-        /// Retrieves the data on the album of the specified Bandcamp page.
+        ///     Retrieves the data on the album of the specified Bandcamp page.
         /// </summary>
         /// <param name="htmlCode">The HTML source code of a Bandcamp album page.</param>
         /// <returns>The data on the album of the specified Bandcamp page.</returns>
-        public static Album GetAlbum(String htmlCode) {
+        public static Album GetAlbum(string htmlCode)
+        {
             // Keep the interesting part of htmlCode only
-            String albumData;
-            try {
+            string albumData;
+            try
+            {
                 albumData = GetAlbumData(htmlCode);
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 throw new Exception("Could not retrieve album data in HTML code.", e);
             }
 
@@ -26,13 +31,17 @@ namespace BandcampDownloader {
 
             // Deserialize JSON
             Album album;
-            try {
-                var settings = new JsonSerializerSettings {
+            try
+            {
+                var settings = new JsonSerializerSettings
+                {
                     NullValueHandling = NullValueHandling.Ignore,
                     MissingMemberHandling = MissingMemberHandling.Ignore
                 };
                 album = JsonConvert.DeserializeObject<JsonAlbum>(albumData, settings).ToAlbum();
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 throw new Exception("Could not deserialize JSON data.", e);
             }
 
@@ -40,57 +49,52 @@ namespace BandcampDownloader {
         }
 
         /// <summary>
-        /// Retrieves all the albums URL existing on the specified Bandcamp page.
+        ///     Retrieves all the albums URL existing on the specified Bandcamp page.
         /// </summary>
         /// <param name="htmlCode">The HTML source code of a Bandcamp page.</param>
         /// <returns>The albums URL existing on the specified Bandcamp page.</returns>
-        public static List<String> GetAlbumsUrl(String htmlCode) {
+        public static List<string> GetAlbumsUrl(string htmlCode)
+        {
             // Get artist bandcamp page
             var regex = new Regex("band_url = \"(?<url>.*)\"");
-            if (!regex.IsMatch(htmlCode)) {
-                throw new NoAlbumFoundException();
-            }
-            String artistPage = regex.Match(htmlCode).Groups["url"].Value;
+            if (!regex.IsMatch(htmlCode)) throw new NoAlbumFoundException();
+            var artistPage = regex.Match(htmlCode).Groups["url"].Value;
 
             // Get albums ("real" albums or track-only pages) relative urls
             regex = new Regex("href=\"(?<url>/(album|track)/.*)\"");
-            if (!regex.IsMatch(htmlCode)) {
-                throw new NoAlbumFoundException();
-            }
+            if (!regex.IsMatch(htmlCode)) throw new NoAlbumFoundException();
 
-            var albumsUrl = new List<String>();
-            foreach (Match m in regex.Matches(htmlCode)) {
-                albumsUrl.Add(artistPage + m.Groups["url"].Value);
-            }
+            var albumsUrl = new List<string>();
+            foreach (Match m in regex.Matches(htmlCode)) albumsUrl.Add(artistPage + m.Groups["url"].Value);
 
             // Remove duplicates
             albumsUrl = albumsUrl.Distinct().ToList();
             return albumsUrl;
         }
 
-        private static String FixJson(String albumData) {
+        private static string FixJson(string albumData)
+        {
             // Some JSON is not correctly formatted in bandcamp pages, so it needs to be fixed before we can deserialize it
 
             // In trackinfo property, we have for instance:
             //     url: "http://verbalclick.bandcamp.com" + "/album/404"
             // -> Remove the " + "
             var regex = new Regex("(?<root>url: \".+)\" \\+ \"(?<album>.+\",)");
-            String fixedData = regex.Replace(albumData, "${root}${album}");
+            var fixedData = regex.Replace(albumData, "${root}${album}");
 
             return fixedData;
         }
 
-        private static String GetAlbumData(String htmlCode) {
-            String startString = "var TralbumData = {";
-            String stopString = "};";
+        private static string GetAlbumData(string htmlCode)
+        {
+            var startString = "var TralbumData = {";
+            var stopString = "};";
 
-            if (htmlCode.IndexOf(startString) == -1) {
-                // Could not find startString
+            if (htmlCode.IndexOf(startString) == -1)
                 throw new Exception("Could not find the following string in HTML code: var TralbumData = {");
-            }
 
-            String albumDataTemp = htmlCode.Substring(htmlCode.IndexOf(startString) + startString.Length - 1);
-            String albumData = albumDataTemp.Substring(0, albumDataTemp.IndexOf(stopString) + 1);
+            var albumDataTemp = htmlCode.Substring(htmlCode.IndexOf(startString) + startString.Length - 1);
+            var albumData = albumDataTemp.Substring(0, albumDataTemp.IndexOf(stopString) + 1);
 
             return albumData;
         }

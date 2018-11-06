@@ -1,35 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
 using System.Linq;
+using Newtonsoft.Json;
 
-namespace BandcampDownloader {
+namespace BandcampDownloader
+{
+    internal class JsonAlbum
+    {
+        public string urlEnd = "_10.jpg";
 
-    internal class JsonAlbum {
-        
         // This uses the art_id variable to retrieve the image from the new bandcamp hosting site
-        public String urlStart = "https://f4.bcbits.com/img/a";
-        public String urlEnd = "_10.jpg";
-        
-        [JsonProperty("artist")]
-        public String Artist { get; set; }
+        public string urlStart = "https://f4.bcbits.com/img/a";
 
-        [JsonProperty("art_id")]
-        public String artId { get; set; }
+        [JsonProperty("artist")] public string Artist { get; set; }
 
-        [JsonProperty("album_release_date")]
-        public DateTime ReleaseDate { get; set; }
+        [JsonProperty("art_id")] public string artId { get; set; }
 
-        [JsonProperty("trackinfo")]
-        public List<JsonTrack> Tracks { get; set; }
+        [JsonProperty("album_release_date")] public DateTime ReleaseDate { get; set; }
 
-        [JsonProperty("current")]
-        public JsonAlbumData AlbumData { get; set; }
+        [JsonProperty("trackinfo")] public List<JsonTrack> Tracks { get; set; }
 
-        public Album ToAlbum() {
-            return new Album() {
+        [JsonProperty("current")] public JsonAlbumData AlbumData { get; set; }
+
+        public Album ToAlbum()
+        {
+            return new Album
+            {
                 Artist = Artist,
-                ArtworkUrl = urlStart+ artId.PadLeft(10, '0')+ urlEnd,
+                ArtworkUrl = urlStart + artId.PadLeft(10, '0') + urlEnd,
                 ReleaseDate = ReleaseDate,
                 Title = AlbumData.AlbumTitle,
                 // Some tracks do not have their URL filled on some albums (pre-release...)

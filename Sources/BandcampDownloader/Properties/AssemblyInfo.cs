@@ -1,6 +1,4 @@
 ﻿using System.Reflection;
-using System.Resources;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows;
 
@@ -53,4 +51,4 @@ using System.Windows;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("0.1.9.3")]
 [assembly: AssemblyFileVersion("0.1.9.3")]
-[assembly: GuidAttribute("8C171C7F-9BAC-4EC0-A287-59908B48953F")]
+[assembly: Guid("8C171C7F-9BAC-4EC0-A287-59908B48953F")]

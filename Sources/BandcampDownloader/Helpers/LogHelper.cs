@@ -1,17 +1,20 @@
 ﻿using System;
 using System.Windows.Media;
 
-namespace BandcampDownloader {
-
-    internal static class LogHelper {
+namespace BandcampDownloader
+{
+    internal static class LogHelper
+    {
         /// <summary>
-        /// Returns the color associated to the specified log type.
+        ///     Returns the color associated to the specified log type.
         /// </summary>
         /// <param name="logType">The type of the log.</param>
-        public static SolidColorBrush GetColor(LogType logType) {
+        public static SolidColorBrush GetColor(LogType logType)
+        {
             SolidColorBrush color;
 
-            switch (logType) {
+            switch (logType)
+            {
                 case LogType.Info:
                     color = Brushes.Black;
                     break;

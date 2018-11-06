@@ -1,11 +1,12 @@
-﻿namespace BandcampDownloader {
-
-    public enum LogType {
+﻿namespace BandcampDownloader
+{
+    public enum LogType
+    {
         Info,
         VerboseInfo,
         IntermediateSuccess,
         Success,
         Warning,
-        Error,
+        Error
     }
 }
