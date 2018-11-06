@@ -12,9 +12,8 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Documents;
-using System.Windows.Media;
-using System.Windows.Threading;
+using System.Windows.Input;
+using System.Windows.Shell;
 using BandcampDownloader.Annotations;
 using BandcampDownloader.MediatorMessages;
 using Config.Net;
@@ -30,19 +29,6 @@ namespace BandcampDownloader.ViewModels
 
 
         #region INotifyPropertyChanged Fields
-
-        private string downloadLocationString;
-
-        public string DownloadLocationString
-        {
-            get => downloadLocationString;
-            set
-            {
-                if (value == downloadLocationString) return;
-                downloadLocationString = value;
-                OnPropertyChanged();
-            }
-        }
 
         private bool downloadStarted;
 
@@ -232,11 +218,26 @@ namespace BandcampDownloader.ViewModels
             }
         }
 
+        private string _urls;
+
+        public string Urls
+        {
+            get => _urls;
+            set
+            {
+                if (value == _urls) return;
+                _urls = value;
+                OnPropertyChanged(nameof(Urls));
+            }
+        }
+
 
         public ObservableCollection<TrackFile> FilesDownload;
         public ObservableCollection<WebClient> PendingDownloads;
 
         #endregion
+
+        public ICommand StartDownloadCommand { get; private set; }
 
 
         public MainViewModel()
@@ -245,6 +246,7 @@ namespace BandcampDownloader.ViewModels
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             versionText = "v" + Assembly.GetEntryAssembly().GetName().Version;
             Task.Factory.StartNew(() => { CheckForUpdates(); });
+            StartDownloadCommand = new DelegateCommand(StartDownload);
 
         }
 
@@ -960,7 +962,11 @@ namespace BandcampDownloader.ViewModels
                             // Update progress bar based on bytes received
                             progressValue = totalReceivedBytes;
                             // Taskbar progress is between 0 and 1
-                            progressBarValue= totalReceivedBytes / maximumProgressValue;
+                            if (maximumProgressValue != 0)
+                            {
+                                progressBarValue = totalReceivedBytes / maximumProgressValue;
+                            }
+
                         }
                         else
                         {
@@ -977,6 +983,153 @@ namespace BandcampDownloader.ViewModels
         private void Log(string eventMessage, LogType logType)
         {
             Messenger.Default.Send(new DownloaderLogMessage(eventMessage, logType));
+        }
+
+        #endregion
+
+        #region Commands
+
+        private void StartDownload()
+        {
+            if (Urls == Constants.UrlsHint)
+            {
+                // No URL to look
+                Log("Paste some albums URLs to be downloaded", LogType.Error);
+
+                return;
+            }
+            int coverArtMaxSize = 0;
+            if (UserSettings.ConvertCoverArtToJpg && !Int32.TryParse(UserSettings.CoverArtMaxSize.ToString(), out coverArtMaxSize))
+            {
+                Log("Cover art max width/height must be an integer", LogType.Error);
+                return;
+            }
+
+            UserCanceled = false;
+
+            PendingDownloads = new ObservableCollection<WebClient>();
+
+            // Set controls to "downloading..." state
+            DownloadStarted = true;
+            UpdateControlsState(true);
+
+            Log("Starting download...", LogType.Info);
+
+            // Get user inputs
+            List<String> userUrls = Urls.Split(new String[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            userUrls = userUrls.Distinct().ToList();
+
+            var urls = new List<String>();
+            var albums = new List<Album>();
+
+            Task.Factory.StartNew(() => {
+                // Get URLs of albums to download
+                if (UserSettings.DownloadArtistDiscography)
+                {
+                    urls = GetArtistDiscography(userUrls);
+                }
+                else
+                {
+                    urls = userUrls;
+                }
+                urls = urls.Distinct().ToList();
+            }).ContinueWith(x => {
+                // Get info on albums
+                albums = GetAlbums(urls);
+            }).ContinueWith(x => {
+                // Save files to download (we'll need the list to update the progressBar)
+                FilesDownload = GetFilesToDownload(albums, UserSettings.SaveCoverArtInTags || UserSettings.SaveCoverArtInFolder);
+            }).ContinueWith(x => {
+                // Set progressBar max value
+                long maxProgressBarValue;
+                if (UserSettings.RetrieveFilesizes)
+                {
+                    maxProgressBarValue = FilesDownload.Sum(f => f.Size); // Bytes to download
+                }
+                else
+                {
+                    maxProgressBarValue = FilesDownload.Count; // Number of files to download
+                }
+                if (maxProgressBarValue > 0)
+                {
+                    Application.Current.Dispatcher.Invoke(new Action(() => {
+                        UpdateProgressNormal(false, maxProgressBarValue, TaskbarItemProgressState.Normal);
+                    }));
+                }
+            }).ContinueWith(x => {
+                // Start downloading albums
+                if (UserSettings.DownloadOneAlbumAtATime)
+                {
+                    // Download one album at a time
+
+                    foreach (Album album in albums)
+                    {
+                        DownloadAlbum(album, ParseDownloadLocation(
+                                UserSettings.DownloadsLocation, album),
+                            UserSettings.TagTracks,
+                            UserSettings.SaveCoverArtInTags,
+                            UserSettings.SaveCoverArtInFolder,
+                            UserSettings.ConvertCoverArtToJpg,
+                            UserSettings.ResizeCoverArt,
+                            UserSettings.CoverArtMaxSize);
+                    }
+
+                }
+                else
+                {
+                    // Parallel download
+                    Task[] tasks = new Task[albums.Count];
+                    for (int i = 0; i < albums.Count; i++)
+                    {
+                        Album album = albums[i]; // Mandatory or else => race condition
+                        tasks[i] = Task.Factory.StartNew(() =>
+                            DownloadAlbum(album,
+                                ParseDownloadLocation(
+                                    UserSettings.DownloadsLocation, album),
+                                UserSettings.TagTracks,
+                                UserSettings.SaveCoverArtInTags,
+                                UserSettings.SaveCoverArtInFolder,
+                                UserSettings.ConvertCoverArtToJpg,
+                                UserSettings.ResizeCoverArt,
+                                UserSettings.CoverArtMaxSize));
+
+                    }
+                    // Wait for all albums to be downloaded
+                    Task.WaitAll(tasks);
+                }
+            }).ContinueWith(x => {
+                if (UserCanceled)
+                {
+                    // Display message if user cancelled
+                    Log("Downloads cancelled by user", LogType.Info);
+                }
+                // Set controls to "ready" state
+                ActiveDownloads = false;
+                UpdateControlsState(false);
+                // Play a sound
+                try
+                {
+                    PlayASound();
+                }
+                catch
+                {
+                }
+            });
+        }
+
+        private void UpdateProgressNormal(bool isIndeterminate, long maxValue, TaskbarItemProgressState state)
+        {
+            Messenger.Default.Send(new ProgressUpdateMessage(isIndeterminate, maxValue, state));
+        }
+
+        private void UpdateControlsState(bool update)
+        {
+            Messenger.Default.Send(new UpdateMainViewControlStateMessage(update));
+        }
+
+        private void PlayASound()
+        {
+            Messenger.Default.Send(new PlayASoundMessage(@"C:\Windows\Media\Windows Ding.wav"));
         }
 
         #endregion

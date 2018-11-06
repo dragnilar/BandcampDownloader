@@ -127,11 +127,11 @@
     <Compile Include="Business Objects\TrackFile.cs" />
     <Compile Include="Business Objects\JSON\JsonAlbumData.cs" />
     <Compile Include="Business Objects\JSON\JsonTrack.cs" />
-    <Page Include="Windows\MainWindowMvvmTest.xaml">
+    <Page Include="Windows\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Windows\MainWindow.xaml">
+    <Page Include="Deprecated\MainWindowOld.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -145,6 +145,9 @@
     <Compile Include="Helpers\OnlyDigitsValidationRule.cs" />
     <Compile Include="Helpers\LogHelper.cs" />
     <Compile Include="MediatorMessages\DownloaderLogMessage.cs" />
+    <Compile Include="MediatorMessages\PlayASoundMessage.cs" />
+    <Compile Include="MediatorMessages\ProgressUpdateMessage.cs" />
+    <Compile Include="MediatorMessages\UpdateMainViewControlStateMessage.cs" />
     <Compile Include="Miscellaneous\Constants.cs" />
     <Compile Include="Miscellaneous\LogType.cs" />
     <Compile Include="Miscellaneous\Extensions.cs" />
@@ -152,11 +155,11 @@
     <Compile Include="Miscellaneous\UserSettings.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
-    <Compile Include="Windows\MainWindowMvvmTest.xaml.cs">
-      <DependentUpon>MainWindowMvvmTest.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Windows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Deprecated\MainWindowOld.xaml.cs">
+      <DependentUpon>MainWindowOld.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
