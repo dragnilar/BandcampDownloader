@@ -13,12 +13,12 @@ using BandcampDownloader.MediatorMessages;
 using BandcampDownloader.ViewModels;
 using Config.Net;
 using DevExpress.Mvvm;
+using DevExpress.Xpf.Core;
 using Cursors = System.Windows.Input.Cursors;
-using MessageBox = System.Windows.MessageBox;
 
 namespace BandcampDownloader
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : DevExpress.Xpf.Core.ThemedWindow
     {
         //TODO - Remove the view model hacks, these were just done for experimental purposes!
 
@@ -30,9 +30,15 @@ namespace BandcampDownloader
             DataContext = vm;
             InitializeSettings(false);
             InitializeComponent();
-            Messenger.Default.Register<DownloaderLogMessage>(this, Log);
+            RegisterMediatorMessages();
+        }
+
+        private void RegisterMediatorMessages()
+        {
+            Messenger.Default.Register<DownloaderLogMessage>(this, ProcessAndDisplayLogMessage);
             Messenger.Default.Register<UpdateMainViewControlStateMessage>(this, ProcessControlStateMessage);
             Messenger.Default.Register<PlayASoundMessage>(this, ProcessPlayASoundMessage);
+            Messenger.Default.Register<ProgressUpdateMessage>(this, ProcessProgressBarMessage);
         }
 
         #endregion Constructor
@@ -106,11 +112,11 @@ namespace BandcampDownloader
 
 
         /// <summary>
-        ///     Displays the specified message in the log with the specified color.
+        ///     Processes and displays the specified message in the log with the specified color.
         /// </summary>
         /// <param name="message">The message.</param>
         /// <param name="color">The color.</param>
-        private void Log(DownloaderLogMessage message)
+        private void ProcessAndDisplayLogMessage(DownloaderLogMessage message)
         {
             Dispatcher.Invoke(() =>
             {
@@ -156,22 +162,21 @@ namespace BandcampDownloader
 
         private void buttonBrowse_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new FolderBrowserDialog();
-            dialog.Description = "Select the folder to save albums";
+            var dialog = new FolderBrowserDialog {Description = "Select the folder to save albums"};
             if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 textBoxDownloadsLocation.Text = dialog.SelectedPath;
         }
 
         private void buttonDefaultSettings_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show("Reset settings to their default values?", "Bandcamp Downloader",
+            if (DXMessageBox.Show("Reset settings to their default values?", "Bandcamp Downloader",
                     MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.Cancel) ==
                 MessageBoxResult.OK) InitializeSettings(true);
         }
 
         private void buttonStop_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show("Would you like to cancel all downloads?", "Bandcamp Downloader",
+            if (DXMessageBox.Show("Would you like to cancel all downloads?", "Bandcamp Downloader",
                     MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No) !=
                 MessageBoxResult.Yes) return;
 
@@ -179,7 +184,7 @@ namespace BandcampDownloader
             {
                 ((MainViewModel) DataContext).UserCanceled = true;
                 Cursor = Cursors.Wait;
-                Log(new DownloaderLogMessage("Cancelling downloads. Please wait...", LogType.Info));
+                ProcessAndDisplayLogMessage(new DownloaderLogMessage("Cancelling downloads. Please wait...", LogType.Info));
 
                 lock (((MainViewModel) DataContext).PendingDownloads)
                 {
@@ -248,7 +253,7 @@ namespace BandcampDownloader
             Dispatcher.Invoke(() =>
             {
                 if (((MainViewModel) DataContext).ActiveDownloads)
-                    if (MessageBox.Show(
+                    if (DXMessageBox.Show(
                             "There are currently active downloads. Are you sure you want to close the application and stop all downloads?",
                             "Bandcamp Downloader", MessageBoxButton.OKCancel, MessageBoxImage.Warning,
                             MessageBoxResult.Cancel) == MessageBoxResult.Cancel)
