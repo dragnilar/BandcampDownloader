@@ -28,7 +28,6 @@ namespace BandcampDownloader
         public MainWindow(MainViewModel vm)
         {
             DataContext = vm;
-            InitializeSettings(false);
             InitializeComponent();
             RegisterMediatorMessages();
         }
@@ -120,7 +119,7 @@ namespace BandcampDownloader
         {
             Dispatcher.Invoke(() =>
             {
-                if (!((MainViewModel) DataContext).UserSettings.ShowVerboseLog &&
+                if (!Globals.UserSettings.ShowVerboseLog &&
                     (message.LogType == LogType.Warning || message.LogType == LogType.VerboseInfo)) return;
 
                 // Time
@@ -134,7 +133,7 @@ namespace BandcampDownloader
                 // Line break
 
                 richTextBoxLog.AppendText(Environment.NewLine);
-                if (((MainViewModel) DataContext).UserSettings.AutoScrollLog) richTextBoxLog.ScrollToEnd();
+                if (Globals.UserSettings.AutoScrollLog) richTextBoxLog.ScrollToEnd();
             });
         }
 
@@ -171,7 +170,7 @@ namespace BandcampDownloader
         {
             if (DXMessageBox.Show("Reset settings to their default values?", "Bandcamp Downloader",
                     MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.Cancel) ==
-                MessageBoxResult.OK) InitializeSettings(true);
+                MessageBoxResult.OK) Globals.InitializeSettings(true);
         }
 
         private void buttonStop_Click(object sender, RoutedEventArgs e)
@@ -184,7 +183,8 @@ namespace BandcampDownloader
             {
                 ((MainViewModel) DataContext).UserCanceled = true;
                 Cursor = Cursors.Wait;
-                ProcessAndDisplayLogMessage(new DownloaderLogMessage("Cancelling downloads. Please wait...", LogType.Info));
+                ProcessAndDisplayLogMessage(new DownloaderLogMessage("Cancelling downloads. Please wait...",
+                    LogType.Info));
 
                 lock (((MainViewModel) DataContext).PendingDownloads)
                 {
@@ -210,17 +210,6 @@ namespace BandcampDownloader
 
                 Cursor = Cursors.Arrow;
             });
-        }
-
-        private void InitializeSettings(bool resetToDefaults)
-        {
-            if (resetToDefaults) File.Delete(Constants.UserSettingsFilePath);
-            // Must set this before UI forms, cannot default in settings as it isn't determined by a constant function
-            if (string.IsNullOrEmpty(((MainViewModel) DataContext).UserSettings.DownloadsLocation))
-                ((MainViewModel) DataContext).UserSettings.DownloadsLocation =
-                    Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\{artist}\\{album}";
-            ((MainViewModel) DataContext).UserSettings = new ConfigurationBuilder<IUserSettings>()
-                .UseIniFile(Constants.UserSettingsFilePath).Build();
         }
 
         private void labelVersion_MouseDown(object sender, MouseButtonEventArgs e)
