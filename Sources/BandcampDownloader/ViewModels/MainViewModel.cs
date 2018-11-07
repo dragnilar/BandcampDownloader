@@ -205,12 +205,12 @@ namespace BandcampDownloader.ViewModels
             }
         }
 
-        private UserSettings userSettings;
+        private IUserSettings userSettings;
 
 
-        public UserSettings UserSettings
+        public IUserSettings UserSettings
         {
-            get => new ConfigurationBuilder<UserSettings>().UseIniFile(Constants.UserSettingsFilePath).Build();
+            get => new ConfigurationBuilder<IUserSettings>().UseIniFile(Constants.UserSettingsFilePath).Build();
             set
             {
                 if (value == userSettings) return;

@@ -54,8 +54,8 @@ namespace BandcampDownloader.Deprecated
 
         #region Fields
 
-        public UserSettings userSettings =
-            new ConfigurationBuilder<UserSettings>().UseIniFile(Constants.UserSettingsFilePath).Build();
+        public IUserSettings userSettings =
+            new ConfigurationBuilder<IUserSettings>().UseIniFile(Constants.UserSettingsFilePath).Build();
 
         /// <summary>
         ///     Indicates if there are active downloads
@@ -1043,7 +1043,7 @@ namespace BandcampDownloader.Deprecated
             if (string.IsNullOrEmpty(userSettings.DownloadsLocation))
                 userSettings.DownloadsLocation =
                     Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\{artist}\\{album}";
-            userSettings = new ConfigurationBuilder<UserSettings>().UseIniFile(Constants.UserSettingsFilePath).Build();
+            userSettings = new ConfigurationBuilder<IUserSettings>().UseIniFile(Constants.UserSettingsFilePath).Build();
             DataContext = userSettings;
         }
 

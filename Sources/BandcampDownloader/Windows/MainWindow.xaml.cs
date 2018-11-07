@@ -219,7 +219,7 @@ namespace BandcampDownloader
             if (string.IsNullOrEmpty(((MainViewModel) DataContext).UserSettings.DownloadsLocation))
                 ((MainViewModel) DataContext).UserSettings.DownloadsLocation =
                     Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\{artist}\\{album}";
-            ((MainViewModel) DataContext).UserSettings = new ConfigurationBuilder<UserSettings>()
+            ((MainViewModel) DataContext).UserSettings = new ConfigurationBuilder<IUserSettings>()
                 .UseIniFile(Constants.UserSettingsFilePath).Build();
         }
 

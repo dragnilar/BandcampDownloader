@@ -2,7 +2,7 @@
 
 namespace BandcampDownloader
 {
-    public interface UserSettings
+    public interface IUserSettings
     {
         [Option(DefaultValue = true)] bool ConvertCoverArtToJpg { get; set; }
 
