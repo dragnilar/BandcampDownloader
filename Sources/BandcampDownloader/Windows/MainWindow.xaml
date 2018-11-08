@@ -8,8 +8,9 @@
     xmlns:local="clr-namespace:BandcampDownloader.ViewModels"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:dxre="http://schemas.devexpress.com/winfx/2008/xaml/richedit"
-    xmlns:dxr="http://schemas.devexpress.com/winfx/2008/xaml/ribbon" xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"  
-     x:Class="BandcampDownloader.MainWindow" 
+    xmlns:dxr="http://schemas.devexpress.com/winfx/2008/xaml/ribbon" xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+                    xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+                    x:Class="BandcampDownloader.MainWindow" 
     Title="Bandcamp Downloader (DX Edition)" Height="680" Width="980" MinHeight="680" MinWidth="980" 
     WindowStyle="SingleBorderWindow" WindowStartupLocation="CenterScreen" Icon="pack://application:,,,/Resources/Cloud.ico" 
      Closing="WindowMain_Closing" d:DataContext="{d:DesignInstance {x:Type local:MainViewModel}, IsDesignTimeCreatable=True}" mc:Ignorable="d" 
@@ -25,6 +26,13 @@
                         <dxb:BarButtonItem Content="Start Download" RibbonStyle="Large" LargeGlyph="{dx:DXImageOffice2013 Image=Download_32x32.png}" Name="BarButtonItemStartDownload" Command="{Binding StartDownloadCommand}"/>
                         <dxb:BarButtonItem Content="Cancel Download" RibbonStyle="Large" LargeGlyph="{dx:DXImageOffice2013 Image=Close_32x32.png}" Name="BarButtonItemCancelDownload" ItemClick="BarButtonItemCancelDownload_OnItemClick" />
                         <dxb:BarButtonItem Content="Reset Settings" RibbonStyle="Large" LargeGlyph="{dx:DXImageOffice2013 Image=Reset_32x32.png}" Name="BarButtonItemResetSettings" ItemClick="BarButtonItemResetSettings_OnItemClick"/>
+                    </dxr:RibbonPageGroup>
+                    <dxr:RibbonPageGroup Caption="Themes">
+                        <dxr:RibbonGalleryBarItem>
+                            <dxmvvm:Interaction.Behaviors>
+                                <dxr:RibbonGalleryItemThemeSelectorBehavior />
+                            </dxmvvm:Interaction.Behaviors>
+                        </dxr:RibbonGalleryBarItem>
                     </dxr:RibbonPageGroup>
                 </dxr:RibbonPage>
             </dxr:RibbonDefaultPageCategory>
