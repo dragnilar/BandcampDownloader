@@ -40,7 +40,7 @@
                     <Button Content="..." Margin="0" x:Name="buttonBrowse" HorizontalAlignment="Right" Width="27" Click="buttonBrowse_Click" TabIndex="2" ToolTip="Browse for folder" VerticalAlignment="Top" />
                 </Grid>
                 <dxe:ProgressBarEdit Margin="0,143,0,0" x:Name="progressBar" VerticalAlignment="Top" IsTabStop="False" Height="18" />
-                <dxre:RichEditControl x:Name="richTextBoxLog" Margin="0,167,0,30" IsTabStop="False" TabIndex="2" ShowBorder="False" ReadOnly="True" HorizontalScrollBarVisibility="Hidden"
+                <dxre:RichEditControl x:Name="RichEditControlLog" Margin="0,167,0,30" IsTabStop="False" TabIndex="2" ShowBorder="False" ReadOnly="True" HorizontalScrollBarVisibility="Hidden"
                                   ActiveViewType="Simple">
                     <dxre:RichEditControl.Resources>
                         <Style TargetType="{x:Type Paragraph}">

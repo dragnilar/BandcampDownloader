@@ -33,6 +33,12 @@ namespace BandcampDownloader
             DataContext = vm;
             InitializeComponent();
             RegisterMediatorMessages();
+            HookUpEvents();
+        }
+
+        private void HookUpEvents()
+        {
+            RichEditControlLog.Loaded += (sender, eventArgs) => RichEditControlLog.ActiveView.AdjustColorsToSkins = true;
         }
 
         private void RegisterMediatorMessages()
@@ -63,7 +69,7 @@ namespace BandcampDownloader
                 if (downloadStarted)
                 {
                     // We just started the download
-                    richTextBoxLog.Document.Delete(richTextBoxLog.Document.Range);
+                    RichEditControlLog.Document.Delete(RichEditControlLog.Document.Range);
                     labelProgress.Content = "";
                     progressBar.StyleSettings = new ProgressBarMarqueeStyleSettings();
                     progressBar.Value = progressBar.Minimum;
@@ -124,33 +130,20 @@ namespace BandcampDownloader
             {
                 if (!Globals.UserSettings.ShowVerboseLog &&
                     (message.LogType == LogType.Warning || message.LogType == LogType.VerboseInfo)) return;
-
-                // Time
-                //var textRange = richTextBoxLog.Document.Range.End;
-                //textRange.BeginUpdateDocument();
-                //textRange.
-                //textRange.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.Gray);
-                //// Message
-                //textRange = new TextRange(richTextBoxLog.Document.ContentEnd, richTextBoxLog.Document.ContentEnd);
-                //textRange.Text = message.LogEntry;
-                //textRange.ApplyPropertyValue(TextElement.ForegroundProperty, LogHelper.GetColor(message.LogType));
-                //// Line break
-                //richTextBoxLog.Document.AppendSection();
-
-                richTextBoxLog.Document.Paragraphs.Append();
-                richTextBoxLog.Document.AppendText(DateTime.Now.ToString("HH:mm:ss") + " ");
-                richTextBoxLog.Document.Paragraphs.Append();
-                var paragraph = richTextBoxLog.Document.Paragraphs.Last().Range;
-                var textFormatting = richTextBoxLog.Document.BeginUpdateCharacters(paragraph);
+                RichEditControlLog.Document.Paragraphs.Append();
+                RichEditControlLog.Document.AppendText(DateTime.Now.ToString("HH:mm:ss") + " ");
+                RichEditControlLog.Document.Paragraphs.Append();
+                var paragraph = RichEditControlLog.Document.Paragraphs.Last().Range;
+                var textFormatting = RichEditControlLog.Document.BeginUpdateCharacters(paragraph);
                 textFormatting.ForeColor = LogHelper.GetColor(message.LogType);
-                richTextBoxLog.Document.EndUpdateCharacters(textFormatting);
-                richTextBoxLog.Document.AppendText(message.LogEntry);
-                richTextBoxLog.Document.AppendText("\n");
-                richTextBoxLog.ScrollToCaret();
+                RichEditControlLog.Document.EndUpdateCharacters(textFormatting);
+                RichEditControlLog.Document.AppendText(message.LogEntry);
+                RichEditControlLog.Document.AppendText("\n");
+                RichEditControlLog.ScrollToCaret();
 
                 if (Globals.UserSettings.AutoScrollLog)
                 {
-                    richTextBoxLog.Document.CaretPosition = richTextBoxLog.Document.Range.End;
+                    RichEditControlLog.Document.CaretPosition = RichEditControlLog.Document.Range.End;
                 }
             });
         }
@@ -221,9 +214,6 @@ namespace BandcampDownloader
             });
         }
 
-        #endregion Events
-
-
         private void BarButtonItemCancelDownload_OnItemClick(object sender, ItemClickEventArgs e)
         {
             //TODO - FIX ME NOW
@@ -235,7 +225,7 @@ namespace BandcampDownloader
             {
                 ((MainViewModel)DataContext).UserCanceled = true;
                 Cursor = Cursors.Wait;
-                ProcessAndDisplayLogMessage(new DownloaderLogMessage("Cancelling downloads. Please wait...",
+                ProcessAndDisplayLogMessage(new DownloaderLogMessage("Canceling downloads. Please wait...",
                     LogType.Info));
 
 
@@ -271,5 +261,10 @@ namespace BandcampDownloader
                     MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.Cancel) ==
                 MessageBoxResult.OK) Globals.InitializeSettings(true);
         }
+
+        #endregion Events
+
+
+
     }
 }
