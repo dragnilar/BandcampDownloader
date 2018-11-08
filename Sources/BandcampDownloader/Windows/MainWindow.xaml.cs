@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Media;
 using System.Windows;
 using System.Windows.Documents;
@@ -13,12 +14,14 @@ using BandcampDownloader.MediatorMessages;
 using BandcampDownloader.ViewModels;
 using Config.Net;
 using DevExpress.Mvvm;
+using DevExpress.Xpf.Bars;
 using DevExpress.Xpf.Core;
+using DevExpress.Xpf.Editors;
 using Cursors = System.Windows.Input.Cursors;
 
 namespace BandcampDownloader
 {
-    public partial class MainWindow : DevExpress.Xpf.Core.ThemedWindow
+    public partial class MainWindow : DevExpress.Xpf.Ribbon.DXRibbonWindow
     {
         //TODO - Remove the view model hacks, these were just done for experimental purposes!
 
@@ -55,19 +58,19 @@ namespace BandcampDownloader
         /// <param name="downloadStarted">True if the download just started, false if it just stopped.</param>
         private void UpdateControlsState(bool downloadStarted)
         {
-            Dispatcher.Invoke(() =>
+            this.Dispatcher.Invoke(() =>
             {
                 if (downloadStarted)
                 {
                     // We just started the download
-                    richTextBoxLog.Document.Blocks.Clear();
+                    richTextBoxLog.Document.Delete(richTextBoxLog.Document.Range);
                     labelProgress.Content = "";
-                    progressBar.IsIndeterminate = true;
+                    progressBar.StyleSettings = new ProgressBarMarqueeStyleSettings();
                     progressBar.Value = progressBar.Minimum;
                     TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Indeterminate;
                     TaskbarItemInfo.ProgressValue = 0;
-                    buttonStart.IsEnabled = false;
-                    buttonStop.IsEnabled = true;
+                    BarButtonItemStartDownload.IsEnabled = false;
+                    BarButtonItemCancelDownload.IsEnabled = true;
                     buttonBrowse.IsEnabled = false;
                     textBoxUrls.IsReadOnly = true;
                     textBoxDownloadsLocation.IsReadOnly = true;
@@ -84,13 +87,13 @@ namespace BandcampDownloader
                 else
                 {
                     // We just finished the download (or user has cancelled)
-                    buttonStart.IsEnabled = true;
-                    buttonStop.IsEnabled = false;
+                    BarButtonItemStartDownload.IsEnabled = true;
+                    BarButtonItemCancelDownload.IsEnabled = false;
                     buttonBrowse.IsEnabled = true;
                     textBoxUrls.IsReadOnly = false;
                     progressBar.Foreground =
                         new SolidColorBrush((Color) ColorConverter.ConvertFromString("#FF01D328")); // Green
-                    progressBar.IsIndeterminate = false;
+                    progressBar.StyleSettings = new ProgressBarStyleSettings();
                     progressBar.Value = progressBar.Minimum;
                     TaskbarItemInfo.ProgressState = TaskbarItemProgressState.None;
                     TaskbarItemInfo.ProgressValue = 0;
@@ -123,17 +126,32 @@ namespace BandcampDownloader
                     (message.LogType == LogType.Warning || message.LogType == LogType.VerboseInfo)) return;
 
                 // Time
-                var textRange = new TextRange(richTextBoxLog.Document.ContentEnd, richTextBoxLog.Document.ContentEnd);
-                textRange.Text = DateTime.Now.ToString("HH:mm:ss") + " ";
-                textRange.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.Gray);
-                // Message
-                textRange = new TextRange(richTextBoxLog.Document.ContentEnd, richTextBoxLog.Document.ContentEnd);
-                textRange.Text = message.LogEntry;
-                textRange.ApplyPropertyValue(TextElement.ForegroundProperty, LogHelper.GetColor(message.LogType));
-                // Line break
+                //var textRange = richTextBoxLog.Document.Range.End;
+                //textRange.BeginUpdateDocument();
+                //textRange.
+                //textRange.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.Gray);
+                //// Message
+                //textRange = new TextRange(richTextBoxLog.Document.ContentEnd, richTextBoxLog.Document.ContentEnd);
+                //textRange.Text = message.LogEntry;
+                //textRange.ApplyPropertyValue(TextElement.ForegroundProperty, LogHelper.GetColor(message.LogType));
+                //// Line break
+                //richTextBoxLog.Document.AppendSection();
 
-                richTextBoxLog.AppendText(Environment.NewLine);
-                if (Globals.UserSettings.AutoScrollLog) richTextBoxLog.ScrollToEnd();
+                richTextBoxLog.Document.Paragraphs.Append();
+                richTextBoxLog.Document.AppendText(DateTime.Now.ToString("HH:mm:ss") + " ");
+                richTextBoxLog.Document.Paragraphs.Append();
+                var paragraph = richTextBoxLog.Document.Paragraphs.Last().Range;
+                var textFormatting = richTextBoxLog.Document.BeginUpdateCharacters(paragraph);
+                textFormatting.ForeColor = LogHelper.GetColor(message.LogType);
+                richTextBoxLog.Document.EndUpdateCharacters(textFormatting);
+                richTextBoxLog.Document.AppendText(message.LogEntry);
+                richTextBoxLog.Document.AppendText("\n");
+                richTextBoxLog.ScrollToCaret();
+
+                if (Globals.UserSettings.AutoScrollLog)
+                {
+                    richTextBoxLog.Document.CaretPosition = richTextBoxLog.Document.Range.End;
+                }
             });
         }
 
@@ -149,7 +167,7 @@ namespace BandcampDownloader
 
         private void ProcessProgressBarMessage(ProgressUpdateMessage message)
         {
-            progressBar.IsIndeterminate = message.IsIndeterminate;
+            progressBar.StyleSettings = new ProgressBarMarqueeStyleSettings();
             progressBar.Maximum = message.Maximum;
             TaskbarItemInfo.ProgressState = message.ProgressState;
         }
@@ -166,52 +184,6 @@ namespace BandcampDownloader
                 textBoxDownloadsLocation.Text = dialog.SelectedPath;
         }
 
-        private void buttonDefaultSettings_Click(object sender, RoutedEventArgs e)
-        {
-            if (DXMessageBox.Show("Reset settings to their default values?", "Bandcamp Downloader",
-                    MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.Cancel) ==
-                MessageBoxResult.OK) Globals.InitializeSettings(true);
-        }
-
-        private void buttonStop_Click(object sender, RoutedEventArgs e)
-        {
-            if (DXMessageBox.Show("Would you like to cancel all downloads?", "Bandcamp Downloader",
-                    MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No) !=
-                MessageBoxResult.Yes) return;
-
-            Dispatcher.Invoke(() =>
-            {
-                ((MainViewModel) DataContext).UserCanceled = true;
-                Cursor = Cursors.Wait;
-                ProcessAndDisplayLogMessage(new DownloaderLogMessage("Cancelling downloads. Please wait...",
-                    LogType.Info));
-
-                lock (((MainViewModel) DataContext).PendingDownloads)
-                {
-                    if (((MainViewModel) DataContext).PendingDownloads.Count == 0)
-                    {
-                        // Nothing to cancel
-                        Cursor = Cursors.Arrow;
-                        return;
-                    }
-                }
-
-                buttonStop.IsEnabled = false;
-                progressBar.Foreground = Brushes.Red;
-                progressBar.IsIndeterminate = true;
-                TaskbarItemInfo.ProgressState = TaskbarItemProgressState.None;
-                TaskbarItemInfo.ProgressValue = 0;
-
-                lock (((MainViewModel) DataContext).PendingDownloads)
-                {
-                    // Stop current downloads
-                    foreach (var webClient in ((MainViewModel) DataContext).PendingDownloads) webClient.CancelAsync();
-                }
-
-                Cursor = Cursors.Arrow;
-            });
-        }
-
         private void labelVersion_MouseDown(object sender, MouseButtonEventArgs e)
         {
             Process.Start(Constants.ProjectWebsite);
@@ -223,7 +195,6 @@ namespace BandcampDownloader
             {
                 // Erase the hint message
                 textBoxUrls.Text = "";
-                textBoxUrls.Foreground = new SolidColorBrush(Colors.Black);
             }
         }
 
@@ -251,5 +222,54 @@ namespace BandcampDownloader
         }
 
         #endregion Events
+
+
+        private void BarButtonItemCancelDownload_OnItemClick(object sender, ItemClickEventArgs e)
+        {
+            //TODO - FIX ME NOW
+            if (DXMessageBox.Show("Would you like to cancel all downloads?", "Bandcamp Downloader",
+                    MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No) !=
+                MessageBoxResult.Yes) return;
+
+            Dispatcher.Invoke(() =>
+            {
+                ((MainViewModel)DataContext).UserCanceled = true;
+                Cursor = Cursors.Wait;
+                ProcessAndDisplayLogMessage(new DownloaderLogMessage("Cancelling downloads. Please wait...",
+                    LogType.Info));
+
+
+                lock (((MainViewModel)DataContext).PendingDownloads)
+                {
+                    if (((MainViewModel)DataContext).PendingDownloads.Count == 0)
+                    {
+                        // Nothing to cancel
+                        Cursor = Cursors.Arrow;
+                        return;
+                    }
+                }
+
+                BarButtonItemCancelDownload.IsEnabled = false;
+                progressBar.Foreground = Brushes.Red;
+                progressBar.StyleSettings = new ProgressBarStyleSettings();
+                TaskbarItemInfo.ProgressState = TaskbarItemProgressState.None;
+                TaskbarItemInfo.ProgressValue = 0;
+
+                lock (((MainViewModel)DataContext).PendingDownloads)
+                {
+                    // Stop current downloads
+                    foreach (var webClient in ((MainViewModel)DataContext).PendingDownloads) webClient.CancelAsync();
+                }
+
+                Cursor = Cursors.Arrow;
+            });
+        }
+
+        private void BarButtonItemResetSettings_OnItemClick(object sender, ItemClickEventArgs e)
+        {
+            if (DXMessageBox.Show("Reset settings to their default values?", "Bandcamp Downloader",
+                    MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.Cancel) ==
+                MessageBoxResult.OK) Globals.InitializeSettings(true);
+        }
     }
 }

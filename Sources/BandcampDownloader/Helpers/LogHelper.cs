@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Media;
+using Color = System.Drawing.Color;
 
 namespace BandcampDownloader
 {
@@ -9,35 +10,38 @@ namespace BandcampDownloader
         ///     Returns the color associated to the specified log type.
         /// </summary>
         /// <param name="logType">The type of the log.</param>
-        public static SolidColorBrush GetColor(LogType logType)
+        public static Color GetColor(LogType logType)
         {
-            SolidColorBrush color;
+            SolidColorBrush brush;
 
             switch (logType)
             {
                 case LogType.Info:
-                    color = Brushes.Black;
+                    brush = Brushes.Black;
                     break;
                 case LogType.VerboseInfo:
-                    color = Brushes.MediumBlue;
+                    brush = Brushes.MediumBlue;
                     break;
                 case LogType.IntermediateSuccess:
-                    color = Brushes.MediumBlue;
+                    brush = Brushes.MediumBlue;
                     break;
                 case LogType.Success:
-                    color = Brushes.Green;
+                    brush = Brushes.Green;
                     break;
                 case LogType.Warning:
-                    color = Brushes.OrangeRed;
+                    brush = Brushes.OrangeRed;
                     break;
                 case LogType.Error:
-                    color = Brushes.Red;
+                    brush = Brushes.Red;
                     break;
                 default:
                     throw new NotImplementedException();
             }
 
+            var color = Color.FromArgb(brush.Color.A, brush.Color.B, brush.Color.G, brush.Color.B);
+
             return color;
+
         }
     }
 }
