@@ -1,18 +1,15 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Media;
 using System.Windows;
-using System.Windows.Documents;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shell;
 using BandcampDownloader.MediatorMessages;
 using BandcampDownloader.ViewModels;
-using Config.Net;
 using DevExpress.Mvvm;
 using DevExpress.Xpf.Bars;
 using DevExpress.Xpf.Core;
@@ -34,6 +31,7 @@ namespace BandcampDownloader
             InitializeComponent();
             RegisterMediatorMessages();
             HookUpEvents();
+            textBoxUrls.NullText = Constants.UrlsHint;
         }
 
         private void HookUpEvents()
@@ -166,8 +164,6 @@ namespace BandcampDownloader
         }
 
         #endregion
-
-
         #region Events
 
         private void buttonBrowse_Click(object sender, RoutedEventArgs e)
@@ -180,25 +176,6 @@ namespace BandcampDownloader
         private void labelVersion_MouseDown(object sender, MouseButtonEventArgs e)
         {
             Process.Start(Constants.ProjectWebsite);
-        }
-
-        private void textBoxUrls_GotFocus(object sender, RoutedEventArgs e)
-        {
-            if (textBoxUrls.Text == Constants.UrlsHint)
-            {
-                // Erase the hint message
-                textBoxUrls.Text = "";
-            }
-        }
-
-        private void textBoxUrls_LostFocus(object sender, RoutedEventArgs e)
-        {
-            if (textBoxUrls.Text == "")
-            {
-                // Show the hint message
-                textBoxUrls.Text = Constants.UrlsHint;
-                textBoxUrls.Foreground = new SolidColorBrush(Colors.DarkGray);
-            }
         }
 
         private void WindowMain_Closing(object sender, CancelEventArgs e)
@@ -263,7 +240,6 @@ namespace BandcampDownloader
         }
 
         #endregion Events
-
 
 
     }

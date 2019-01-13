@@ -40,8 +40,8 @@
         <dxr:RibbonStatusBarControl DockPanel.Dock="Bottom"/>
         <Grid x:Name="gridMain">
             <Grid x:Name="gridLeft" Margin="10,10,230,10">
-                <dxe:TextEdit Margin="0" x:Name="textBoxUrls" AcceptsReturn="True" Height="111" VerticalAlignment="Top" Text="{Binding Urls, Mode=TwoWay}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" GotFocus="textBoxUrls_GotFocus" LostFocus="textBoxUrls_LostFocus" TabIndex="0"
-                          HorizontalContentAlignment="Left" VerticalContentAlignment="Top"/>
+                <dxe:TextEdit Margin="0" x:Name="textBoxUrls" Height="111" VerticalAlignment="Top" Text="{Binding Urls, UpdateSourceTrigger=PropertyChanged}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TabIndex="0"
+                          HorizontalContentAlignment="Left" VerticalContentAlignment="Top" AcceptsReturn="True"/>
                 <Grid x:Name="gridDownloadsLocation" Margin="0,117,0,0" VerticalAlignment="Top">
                     <Label Content="Save albums to" HorizontalAlignment="Left" Margin="0,-3,0,0" x:Name="labelDownloadsLocation" VerticalAlignment="Top" ToolTip="You can use placeholders to customize the download folder depending on the album:&#xA;- {artist} will be replaced by the album artist&#xA;- {album} will be replaced by the album name&#xA;- {year}, {month} and {day} will be replaced by the album release date" />
                     <dxe:TextEdit Text="{Binding UserSettings.DownloadsLocation, Mode=TwoWay}" Margin="95,0,32,0" x:Name="textBoxDownloadsLocation" TabIndex="1" ToolTip="You can use placeholders to customize the download folder depending on the album:&#xA;- {artist} will be replaced by the album artist&#xA;- {album} will be replaced by the album name&#xA;- {year}, {month} and {day} will be replaced by the album release date" VerticalAlignment="Top" Height="20" />

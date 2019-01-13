@@ -1,28 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.IO;
-using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Shell;
 using BandcampDownloader.Annotations;
 using BandcampDownloader.MediatorMessages;
 using BandcampDownloader.ProgressReporters;
 using BandcampDownloader.Services;
-using Config.Net;
 using DevExpress.Mvvm;
-using ImageResizer;
-using TagLib;
-using File = System.IO.File;
+using DevExpress.Mvvm.POCO;
 
 namespace BandcampDownloader.ViewModels
 {
@@ -224,18 +214,7 @@ namespace BandcampDownloader.ViewModels
             }
         }
 
-        private string _urls;
-
-        public string Urls
-        {
-            get => _urls;
-            set
-            {
-                if (value == _urls) return;
-                _urls = value;
-                OnPropertyChanged(nameof(Urls));
-            }
-        }
+        public virtual string Urls { get; set; }
 
         public ObservableCollection<WebClient> PendingDownloads;
 
@@ -314,7 +293,7 @@ namespace BandcampDownloader.ViewModels
 
         private void StartDownload()
         {
-            if (Urls == Constants.UrlsHint)
+            if (string.IsNullOrWhiteSpace(Urls))
             {
                 // No URL to look
                 Log("Paste some albums URLs to be downloaded", LogType.Error);
